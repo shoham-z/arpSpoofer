@@ -2,6 +2,8 @@ import scapy.all as scapy
 import sys
 import time
 
+# to run in linux:
+# sudo python3 main.py [args]
 
 target_ip = "192.168.1.135"  # Enter your target IP
 gateway_ip = "192.168.1.1"  # Enter your gateway's IP
