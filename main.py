@@ -3,7 +3,7 @@ import sys
 import time
 
 # to run in linux:
-דם# install scapy globally
+# install scapy globally
 # sudo python3 main.py [args]
 
 target_mac = ""
