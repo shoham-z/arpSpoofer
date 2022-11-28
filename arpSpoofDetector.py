@@ -31,8 +31,8 @@ if __name__ == "__main__":
     errors = 0
     while True:
         # getting arp table
-        os.system("arp -a> arpTable")
-        with open("arpTable", "r") as f:
+        os.system("arp -a> arpTable.txt")
+        with open("arpTable.txt", "r") as f:
             for line in f:
                 print(line)
                 packets.append(
