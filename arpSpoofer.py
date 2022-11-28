@@ -4,7 +4,7 @@ import time
 
 # to run in linux:
 # install scapy globally
-# sudo python3 main.py [args]
+# sudo python3 arpSpoofer.py [args]
 
 target_mac = ""
 target_ip = ""
@@ -90,6 +90,5 @@ if __name__ == "__main__":
                 interface = sys.argv[sys.argv.index("-i") + 1]
             except:
                 interface = sys.argv[sys.argv.index("--iface") + 1]
-
 
     main()
