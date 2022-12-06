@@ -6,10 +6,7 @@
 # to prevent it use static arp entries
 
 
-
 errors = 0
-
-
 
 from scapy.all import *
 import re
@@ -17,6 +14,8 @@ import re
 from scapy.layers.inet import IP, ICMP
 from scapy.layers.l2 import Ether, ARP
 import platform
+import time
+import os
 
 mac_address_regex = re.compile(r'([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})')
 broadcast_mac_address = 'ff:ff:ff:ff:ff:ff'
